@@ -1,69 +1,34 @@
+#!/usr/bin/env python3
 import runpod
-import torch
-from diffusers import DiffusionPipeline
-import base64
-import io
-from PIL import Image
-import os
+import json
 
-# Global variable to store the model
-pipe = None
-
-def load_model():
-    """Load the Wan Video model"""
-    global pipe
-    if pipe is None:
-        print("Loading Wan Video model...")
-        # Adjust model path/name based on actual Wan Video implementation
-        pipe = DiffusionPipeline.from_pretrained(
-            "Wan-AI/Wan2.1-VACE-14B",
-            torch_dtype=torch.float16,
-            device_map="auto"
-        )
-        print("Model loaded successfully!")
-    return pipe
-
-def generate_video(prompt, num_frames=16, width=720, height=480):
-    """Generate video from text prompt"""
-    model = load_model()
-    
-    # Generate video
-    result = model(
-        prompt=prompt,
-        num_frames=num_frames,
-        width=width,
-        height=height,
-        num_inference_steps=50
-    )
-    
-    return result
-
-def handler(event):
-    """Main handler function for RunPod"""
+def handler(job):
+    """
+    This is the handler function that will be called by the serverless worker.
+    """
     try:
-        # Get input from event
-        input_data = event["input"]
-        prompt = input_data.get("prompt", "A beautiful sunset over mountains")
-        num_frames = input_data.get("num_frames", 16)
-        width = input_data.get("width", 720)
-        height = input_data.get("height", 480)
+        # Get the input from the job
+        job_input = job.get("input", {})
         
-        # Generate video
-        video_result = generate_video(prompt, num_frames, width, height)
+        # Extract parameters
+        prompt = job_input.get("prompt", "A beautiful landscape")
         
-        # Process and return result
-        return {
+        # For now, return a simple response
+        # Later you can add Wan Video model here
+        result = {
             "status": "success",
-            "message": "Video generated successfully",
-            "prompt": prompt,
-            "frames": num_frames
+            "message": "Handler is working correctly!",
+            "received_prompt": prompt,
+            "note": "Ready for Wan Video integration"
         }
+        
+        return result
         
     except Exception as e:
         return {
-            "status": "error",
-            "message": str(e)
+            "status": "error", 
+            "error": str(e)
         }
 
-# Initialize RunPod serverless
+# Start the serverless worker
 runpod.serverless.start({"handler": handler})
