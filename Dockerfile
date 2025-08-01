@@ -1,4 +1,7 @@
-FROM pytorch/pytorch:2.1.0-cuda11.8-devel
+FROM runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
+
+# Set working directory
+WORKDIR /workspace
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -6,33 +9,23 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     ffmpeg \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /workspace
-
 # Install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install \
-    transformers \
-    diffusers \
-    accelerate \
-    torch-audio \
-    opencv-python \
-    pillow \
-    numpy \
-    gradio \
-    huggingface-hub
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Clone Wan Video repository (adjust if needed)
-RUN git clone https://github.com/Wan-AI/Wan2.1-VACE-14B.git
+# Copy handler
+COPY runpod_handler.py .
 
 # Set environment variables
 ENV PYTHONPATH=/workspace
 ENV HF_HOME=/workspace/cache
 
-# Expose port for web interface
-EXPOSE 7860
+# Expose port
+EXPOSE 8080
 
-# Default command
-CMD ["python", "-c", "print('Wan Video environment ready!')"]
+# Command to run
+CMD ["python", "runpod_handler.py"]
