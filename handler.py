@@ -1,34 +1,30 @@
-#!/usr/bin/env python3
 import runpod
-import json
 
 def handler(job):
     """
-    This is the handler function that will be called by the serverless worker.
+    Handler function for RunPod Serverless
+    
+    Args:
+        job (dict): The job object containing input data
+        
+    Returns:
+        dict: The result to be returned to the client
     """
-    try:
-        # Get the input from the job
-        job_input = job.get("input", {})
-        
-        # Extract parameters
-        prompt = job_input.get("prompt", "A beautiful landscape")
-        
-        # For now, return a simple response
-        # Later you can add Wan Video model here
-        result = {
-            "status": "success",
-            "message": "Handler is working correctly!",
-            "received_prompt": prompt,
-            "note": "Ready for Wan Video integration"
-        }
-        
-        return result
-        
-    except Exception as e:
-        return {
-            "status": "error", 
-            "error": str(e)
-        }
+    # Get the job input
+    job_input = job["input"]
+    
+    # Extract parameters from input
+    prompt = job_input.get("prompt", "default prompt")
+    
+    # Your processing logic goes here
+    # For now, just return a test response
+    result = {
+        "message": "Handler is working!",
+        "prompt_received": prompt,
+        "status": "success"
+    }
+    
+    return result
 
 # Start the serverless worker
 runpod.serverless.start({"handler": handler})
